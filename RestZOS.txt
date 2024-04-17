@@ -1,0 +1,61 @@
+//userid   JOB CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=userid,
+//         REGION=4096K
+//*  USER=HERC01,PASSWORD=CUL8TR
+//********************************************************************
+//*  Change 'userid' into your TSO userid.
+//*  Change 'your.upload.xmi' in the dataset where you uploaded the
+//*                           xmi file.
+//*  this jcl was tested on a z/os 2.05 system.
+//********************************************************************
+//*
+//*  *************** this is experimental ********************
+//*  THIS JOB RECEIVES THE ARCHEXTN SOFTWARE FROM A XMI FILE on Z/OS
+//*  *************** this is experimental ********************
+//*
+//*  THE SOFTWARE RESIDES IN 8 DATASETS.  BY DEFAULT, THE DATASETS
+//*  ARE PREFIXED WITH 'userid.ARCHEXTN' ON volser.
+//*  Since the code is all 24 bit code, all the source code will not
+//*  be restored and only the items needed for execution all included.
+//*
+//*   .CNTL    CONTAINS ALL RELATED JCL
+//*   .LOADLIB CONTAINS THE EXECUTABLE CODE.
+//*   .PROCLIB CONTAINS ALL THE PROCS FOR EXECUTING ARCHEXTN PROGRAMS.
+//*   userid.PL1LIB CONTAINS ALL THE REQUIRED PL/I (F) RUNTIME STUFF.
+//*
+//********************************************************************
+//*
+//*  DELETE ARCHEXTN DATASETS
+//*
+//STEP01  EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+ DELETE 'userid.ARCHEXTN.CNTL' NONVSAM PURGE
+ DELETE 'userid.ARCHEXTN.JCL' NONVSAM PURGE
+ DELETE 'userid.ARCHEXTN.LOADLIB' NONVSAM PURGE
+ DELETE 'userid.ARCHEXTN.PROCLIB' NONVSAM PURGE
+ DELETE 'userid.ARCHEXTN.PDSXMI' NONVSAM PURGE
+ DELETE 'userid.PL1LIB' NONVSAM PURGE
+ SET LASTCC = 0
+ SET MAXCC = 0
+//*
+//*  note the z/os receive requires more info to work.
+//*  the RESTORE response to prompts.
+//*
+//STEP02 EXEC PGM=IKJEFT01,REGION=4096K
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+ PROFILE PROMPT PREFIX(userid)
+ RECEIVE INDATASET('userid.ARCHEXTN.XMI')
+RESTORE
+ RECEIVE INDATASET('userid.ARCHEXTN.PDSXMI(JCL)')
+RESTORE
+ RECEIVE INDATASET('userid.ARCHEXTN.PDSXMI(LOADLIB)')
+RESTORE
+ RECEIVE INDATASET('userid.ARCHEXTN.PDSXMI(PROCLIB)')
+RESTORE
+ RECEIVE INDATASET('userid.ARCHEXTN.PDSXMI(RUNTIME)')
+RESTORE
+ RENAME 'userid.ARCHEXTN.JCL' 'userid.ARCHEXTN.CNTL'
+ DELETE 'userid.ARCHEXTN.PDSXMI' PURGE
+//
+
