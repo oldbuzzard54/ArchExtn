@@ -1,4 +1,4 @@
-# ArchExtn V1 R0 M0
+# ArchExtn V1 R1 M0
 Utility Programs to extend Archiver Files For MVS 3.8j
 Welcome to Archiver Extentions.  This is a group of programs designed
 to provide additional feature for users of Archiver.  The full use of
@@ -17,6 +17,7 @@ The collection (so far) consists of PL/I programs to:
                 sequences
      ARCHCOMP - Compares the indecies of two Archiver clusters to
                 highlight differences
+     ARCHRST  - Reset Version numbers
      ARCHUTIL - Unloads/Loads an Archive cluster to/from files
                 suitable for transmission
 
