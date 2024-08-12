@@ -1,0 +1,44 @@
+//RESTTK5  JOB CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1), NOTIFY=HERC01,
+//         REGION=512K,USER=HERC01,PASSWORD=CUL8TR
+//********************************************************************
+//*  REMOVE space before NOTIFY in job if so desired.
+//*  Change MSGCLASS above is so desired.
+//*  Change 'volser' into your volume serial.
+//*  Change 'your.upload.patchxmi' in the dataset where you uploaded
+//*                        the xmi file.
+//*  Change in step03, the OUTPUT dd to where ARCHEXTN is installed
+//*          if not 'SYS2.LINLIB'.
+//********************************************************************
+//*
+//*  THIS JOB RECEIVES THE ARCHEXTN SOFTWARE PATCH FROM AN XMI FILE.
+//*
+//********************************************************************
+//*
+//*  DELETE PREVIOUS PATCH DATASETS
+//*
+//STEP01  EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+ /*  delete previous patch if any */
+ DELETE 'ARCHEXTN.V1R2M0.PATCHLIB' NONVSAM PURGE
+ SET LASTCC = 0
+ SET MAXCC = 0
+//*
+//STEP02 EXEC PGM=IKJEFT01,REGION=4096K
+//*SYSHELP  DD  DISP=SHR,DSN=SYS1.HELP
+//*SYSPROC  DD  DISP=SHR,DSN=SYS1.CMDPROC
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+ RECEIVE DATASET('ARCHEXTN.V1R2M0.PATCHLIB') VOL(volser) -
+         INDATASET('your.upload.patchxmi')
+ LISTC L(ARCHEXTN)
+//*
+//STEP03 EXEC PGM=IEBCOPY,COND=(0,NE,STEP02)
+//SYSPRINT DD SYSOUT=*
+//INPUT    DD DSN=ARCHEXTN.V1R2M0.PATCHLIB,DISP=SHR
+//OUTPUT   DD DSN=SYS2.LINKLIB,DISP=SHR
+//*OUTPUT   DD DSN=HERC01.V1R2M0.LOADLIB,DISP=SHR
+//SYSIN    DD *
+ COPY INDD=INPUT,OUTDD=OUTPUT
+ S M=((ARCHRST,,R))
+//*
